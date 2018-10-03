@@ -36,6 +36,8 @@ module.exports = {
         var Like = new LikeModel({
           date : req.body.date,
           user : req.body.user,
+          post : req.body.post,
+          comment : req.body.comment,
         });
 
         Like.save(function (err, Like) {
@@ -66,6 +68,8 @@ module.exports = {
 
             Like.date = req.body.date ? req.body.date : Like.date,
             Like.user = req.body.user ? req.body.user : Like.user,
+            Like.post = req.body.post ? req.body.post : Like.post,
+            Like.comment = req.body.comment ? req.body.comment : Like.comment,
 			
             Like.save(function (err, Like) {
                 if (err) {

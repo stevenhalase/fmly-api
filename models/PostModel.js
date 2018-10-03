@@ -1,18 +1,26 @@
 const mongoose = require('mongoose');
 const Schema   = mongoose.Schema;
 
-const UserModel = require('./UserModel.js');
-const CommentModel = require('./CommentModel.js');
-const LikeModel = require('./LikeModel.js');
-
 const PostSchema = new Schema({
-	date : Date,
-	title : String,
+	date : Number,
 	message : String,
 	image : String,
-	user : UserModel,
-	likes : [LikeModel],
-	comments : [CommentModel],
+	user : { type: Schema.Types.ObjectId, ref: 'User' },
 });
+
+PostSchema.virtual('likes', {
+  ref: 'Like',
+  localField: '_id',
+  foreignField: 'post'
+})
+
+PostSchema.virtual('comments', {
+  ref: 'Comment',
+  localField: '_id',
+  foreignField: 'post'
+})
+
+PostSchema.set('toObject', { virtuals: true });
+PostSchema.set('toJSON', { virtuals: true });
 
 module.exports = mongoose.model('Post', PostSchema);

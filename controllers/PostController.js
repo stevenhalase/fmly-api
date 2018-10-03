@@ -3,44 +3,85 @@ const PostModel = require('../models/PostModel.js');
 module.exports = {
 
     list: function (req, res) {
-        PostModel.find(function (err, Posts) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting Post.',
-                    error: err
-                });
-            }
-            return res.json(Posts);
-        });
+        PostModel.find()
+            .populate('user')
+            .populate('likes')
+            .populate('comments')
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'user'
+                } 
+            })
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'likes'
+                } 
+            })
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'replies'
+                } 
+            })
+            .exec(function (err, Posts) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when getting Post.',
+                        error: err
+                    });
+                }
+                return res.json(Posts);
+            });
     },
 
     show: function (req, res) {
         var id = req.params.id;
-        PostModel.findOne({_id: id}, function (err, Post) {
-            if (err) {
-                return res.status(500).json({
-                    message: 'Error when getting Post.',
-                    error: err
-                });
-            }
-            if (!Post) {
-                return res.status(404).json({
-                    message: 'No such Post'
-                });
-            }
-            return res.json(Post);
-        });
+        PostModel.findOne({_id: id})
+            .populate('user')
+            .populate('likes')
+            .populate('comments')
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'user'
+                } 
+            })
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'likes'
+                } 
+            })
+            .populate({ 
+                path: 'comments',
+                populate: {
+                    path: 'replies'
+                } 
+            })
+            .exec(function (err, Post) {
+                if (err) {
+                    return res.status(500).json({
+                        message: 'Error when getting Post.',
+                        error: err
+                    });
+                }
+                if (!Post) {
+                    return res.status(404).json({
+                        message: 'No such Post'
+                    });
+                }
+                return res.json(Post);
+            });
     },
 
     create: function (req, res) {
         var Post = new PostModel({
           date : req.body.date,
-          title : req.body.title,
           message : req.body.message,
           image : req.body.image,
           user : req.body.user,
-          likes : req.body.likes,
-          comments : req.body.comments,
         });
 
         Post.save(function (err, Post) {
@@ -71,12 +112,9 @@ module.exports = {
 
             Post.author = req.body.author ? req.body.author : Post.author;
             Post.date = req.body.date ? req.body.date : Post.date,
-            Post.title = req.body.title ? req.body.title : Post.title,
             Post.message = req.body.message ? req.body.message : Post.message,
             Post.image = req.body.image ? req.body.image : Post.image,
             Post.user = req.body.user ? req.body.user : Post.user,
-            Post.likes = req.body.likes ? req.body.likes : Post.likes,
-            Post.comments = req.body.comments ? req.body.comments : Post.comments,
 			
             Post.save(function (err, Post) {
                 if (err) {
